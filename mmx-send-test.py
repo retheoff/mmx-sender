@@ -24,7 +24,7 @@ def run(pargs):
 	count = int(indexArgs('count')) if (indexArgs('count') != None) else 0
 
 	delay = float(indexArgs('delay')) if (indexArgs('delay') != None) else 200
-	print("Selected delay: " + str(delay))
+	# print("Selected delay: " + str(delay))
 	if delay > 0:
 		delay = delay / 1000
 
@@ -35,6 +35,7 @@ def run(pargs):
 
 	
 	print("Sending transactions: " + str(count) + " Iterations: " + str(loop))
+	print("Delaying txs: " + str(delay))
 	loop_count = 0
 	
 	while loop_count < loop:
@@ -43,19 +44,13 @@ def run(pargs):
 		c = 0
 		for address in data:
 			if(c >= 1):
-				print("Delaying tx: " + str(delay))
 				time.sleep(delay)
 			
 			# print(loop_count)
 			try:
-				# proc = subprocess.run([MMXCMD, 'wallet', 'send', '-a', str(amount), '-t', address]
-				# 	, stdout=PIPE, stderr=STDOUT, check=True, text=True)
+				
 				cmd = [MMXCMD, 'wallet', 'send', '-a', str(amount), '-t', address]
-				# print("Starting send using command:")
 				print("{0}".format(' '.join(cmd)))
-				# ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-				# result = ps.communicate()[0]
-				#  = proc.stdout
 				proc = subprocess.Popen(cmd,
 					stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 
@@ -77,10 +72,7 @@ def run(pargs):
 				print(' '.join(proc.args))
 				print(e)
 				# continue
-
-			# if result is not None:
-			# 	print(result.decode('utf-8'))
-			#os.system('mmx wallet send -a ' + str(AMT) + ' -t ' + x)
+			
 			c += 1
 			if c >= count:
 				break

@@ -24,25 +24,57 @@ def run(pargs):
 	while len(addrs) < COUNT:
 		print('Block: ' + str(block)  + ' block count: ' + str(c) + ' addresses found: ' + str(len(addrs)) )
 		cmd = [MMXCMD, 'node', 'get', 'block', str(block)]
-		try:
-			proc = subprocess.run([MMXCMD, 'node', 'get', 'block', str(block)]
-				, capture_output=True, check=True, text=True)
-			result = proc.stdout
-		except Exception as e:
-			print(e)
-			continue
+		# try:
+		# 	proc = subprocess.run([MMXCMD, 'node', 'get', 'block', str(block)]
+		# 		, capture_output=True, check=True, text=True)
+		# 	result = proc.stdout
+		# except Exception as e:
+		# 	print(e)
+		# 	continue
 
-		if result is not None:
-			j = json.loads(result)
-			if j is None:
+		try:
+			# print("{0}".format(' '.join(cmd)))
+			proc = subprocess.Popen(cmd,
+				stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+
+			result, err = proc.communicate()
+			if(not err):
+				# print(result.decode('utf-8'))
+				j = json.loads(result)
+				if j is None:
+					c += 1
+					continue
+				if j['tx_base'] is not None:
+					for x in j['tx_base']['outputs']:
+						if x['address'] not in addrs:
+							print("Found addr: {0}".format(x['address']))
+							addrs.add(x['address'])
+						
+			else:
+				raise Exception("  ***Error***  \n{0}".format(err.decode('utf-8')) )
+
+
+		except subprocess.CalledProcessError as e:
+			print("Process Error running mmx: ")
+			print(' '.join(proc.args))
+			print(e.output.decode())
+			# continue
+		except Exception as e:
+			print("Error running mmx: ")
+			print(' '.join(proc.args))
+			print(e)
+
+		# if result is not None:
+		# 	j = json.loads(result)
+		# 	if j is None:
 				
-				c += 1
-				continue
-			# print(str(block))
-			if j['tx_base'] is not None:
-				for x in j['tx_base']['outputs']:
-					print(x['address'])
-					addrs.add(x['address'])
+		# 		c += 1
+		# 		continue
+		# 	# print(str(block))
+		# 	if j['tx_base'] is not None:
+		# 		for x in j['tx_base']['outputs']:
+		# 			print(x['address'])
+		# 			addrs.add(x['address'])
 		block += 1
 		c += 1
 		if c > MAXBLOCKS:
@@ -55,6 +87,9 @@ def run(pargs):
 
 	output = list(addrs)
 	json.dump(output, open(outfile, 'w'))
+	print("Found addresses: {0} ".format(len(output)))
+	print("Saved address file: {0}".format(outfile))
+	
 
 	return 0
 
