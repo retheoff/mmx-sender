@@ -7,7 +7,10 @@ import platform
 import textwrap
 import random
 
-
+def quickPopen(cmd):
+	cmd = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+	out, err = cmd.communicate()
+	return out, err
 
 def run(pargs):
 	indexArgs = lambda key: getattr(pargs,key) if hasattr(pargs,key) else None
@@ -39,17 +42,49 @@ def run(pargs):
 		random.shuffle(data)
 		c = 0
 		for address in data:
-			print("Starting send to: " + address)
+			if(c >= 1):
+				print("Delaying tx: " + str(delay))
+				time.sleep(delay)
+			
 			# print(loop_count)
-			result = subprocess.run([MMXCMD, 'wallet', 'send', '-a', str(amount), '-t', address], capture_output=True, text=True).stdout
-			if result is not None:
-				print(result)
+			try:
+				# proc = subprocess.run([MMXCMD, 'wallet', 'send', '-a', str(amount), '-t', address]
+				# 	, stdout=PIPE, stderr=STDOUT, check=True, text=True)
+				cmd = [MMXCMD, 'wallet', 'send', '-a', str(amount), '-t', address]
+				# print("Starting send using command:")
+				print("{0}".format(' '.join(cmd)))
+				# ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+				# result = ps.communicate()[0]
+				#  = proc.stdout
+				proc = subprocess.Popen(cmd,
+					stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+
+				result, err = proc.communicate()
+				if(not err):
+					# print("Result ........")
+					print(result.decode('utf-8'))
+				else:
+					raise Exception("  ***Error***  \n{0}".format(err.decode('utf-8')) )
+
+
+			except subprocess.CalledProcessError as e:
+				print("Process Error running mmx: ")
+				print(' '.join(proc.args))
+				print(e.output.decode())
+				# continue
+			except Exception as e:
+				print("Error running mmx: ")
+				print(' '.join(proc.args))
+				print(e)
+				# continue
+
+			# if result is not None:
+			# 	print(result.decode('utf-8'))
 			#os.system('mmx wallet send -a ' + str(AMT) + ' -t ' + x)
 			c += 1
 			if c >= count:
 				break
-			print("Delaying tx: " + str(delay))
-			time.sleep(delay)
+			
 
 		loop_count += 1
 

@@ -23,10 +23,20 @@ def run(pargs):
 	c = 1
 	while len(addrs) < COUNT:
 		print('Block: ' + str(block)  + ' block count: ' + str(c) + ' addresses found: ' + str(len(addrs)) )
-		result = subprocess.run([MMXCMD, 'node', 'get', 'block', str(block)], capture_output=True, text=True).stdout
+		cmd = [MMXCMD, 'node', 'get', 'block', str(block)]
+		try:
+			proc = subprocess.run([MMXCMD, 'node', 'get', 'block', str(block)]
+				, capture_output=True, check=True, text=True)
+			result = proc.stdout
+		except Exception as e:
+			print(e)
+			continue
+
 		if result is not None:
 			j = json.loads(result)
 			if j is None:
+				
+				c += 1
 				continue
 			# print(str(block))
 			if j['tx_base'] is not None:
