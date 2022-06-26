@@ -3,7 +3,50 @@ Send test transactions and harvest addresses
 
 https://github.com/retheoff/mmx-sender
 
-First harvest some addresses.
+The goal of this is to provide a constant stream of transactions, but not necessarily a benchmark or stress test. 
+
+You'll need to take 3 steps:
+
+1. Calculate your send job 
+    (based on your budget and time/duration of the send job)
+2. Harvest addresses from the network
+    (this is saved in a json file)
+2b. Optional: Save a list of your addresses to randomize sending from.
+
+3. Do the send job!
+
+
+Calcuate a send job:
+
+calc_job.py MMX DURATION NBR_ADDR AVG_DELAY_PER_TX
+Calculate the amount (MMX) sent per transaction and number of iterations to simulate.
+
+Example:
+I have 500 MMX.
+I want it to run for 4 hours.
+I have 50 addresses on the network harvested.
+I want to set each transaction to have a 525 ms average delay.
+
+calc_job.py 500 4 50 525
+
+OUTPUT (provides the send job command to run):
+    mmx-send-test.py --amount 0.009960,0.018498 --count 50 --delay 368,682 --iterations 549
+
+
+
+
+Save a list of your own addresses:
+run:
+get_my_addresses.py
+
+All this does is run "mmx wallet show 50".
+Then saves your addresses from that output to $HOME/my_mmx_addresses.json
+If this is detected by the mmx-send-test.py script it will be used to randomize the source address in transaction sending, using your wallet addresses.
+
+
+
+
+Harvest some addresses.
 Testnet only have so many addresses and blocks to search.  I pick 50 addresses for now and search through 5000 blocks.
 
 ```
